@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EzThrift.com - The EZ way to thrift</title>
+  
+  <!-- Leaflet CSS for Map -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <style>
+    /* CSS Variables for Easy Styling & High Contrast Toggle */
+    :root {
+      --bg-color: #f8fafc;
+      --panel-bg: #ffffff;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+      --primary: #16a34a;
+      --primary-hover: #15803d;
+      --accent: #d97706;
+      --border-color: #e2e8f0;
+      --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      --font-base: 17px;
+      --focus-ring: 3px solid #2563eb;
+    }
+
+    /* High Contrast Mode Styles */
+    body.high-contrast {
+      --bg-color: #000000;
+      --panel-bg: #121212;
+      --text-main: #ffffff;
+      --text-muted: #e2e8f0;
+      --primary: #22c55e;
+      --primary-hover: #4ade80;
+      --accent: #fbbf24;
+      --border-color: #ffffff;
+      --card-shadow: 0 0 0 2px #ffffff;
+      --focus-ring: 4px solid #ffff00;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-size: var(--font-base);
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Accessibility Focus Style */
+    a:focus, button:focus, input:focus, select:focus {
+      outline: var(--focus-ring);
+      outline-offset: 2px;
+    }
+
+    /* Header */
+    header {
+      background-color: var(--panel-bg);
+      border-bottom: 2px solid var(--border-color);
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      z-index: 1000;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand i {
+      font-size: 1.8rem;
+      color: var(--primary);
+    }
+
+    .brand-text h1 {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--primary);
+      line-height: 1.1;
+    }
+
+    .brand-text span {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--accent);
+      letter-spacing: 0.5px;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn {
+      background-color: var(--primary);
+      color: #ffffff;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: background-color 0.2s;
+    }
+
+    .btn:hover {
+      background-color: var(--primary-hover);
+    }
+
+    .btn-secondary {
+      background-color: transparent;
+      color: var(--text-main);
+      border: 2px solid var(--border-color);
+    }
+
+    .btn-secondary:hover {
+      background-color: var(--border-color);
+    }
+
+    /* Main Container */
+    .main-container {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Sidebar Panel */
+    .sidebar {
+      width: 420px;
+      background-color: var(--panel-bg);
+      border-right: 2px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      z-index: 500;
+    }
+
+    /* Search & Filter Controls */
+    .search-panel {
+      padding: 16px;
+      border-bottom: 2px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background-color: var(--panel-bg);
+    }
+
+    .search-box {
+      display: flex;
+      gap: 8px;
+    }
+
+    .search-box input {
+      flex: 1;
+      padding: 12px 14px;
+      border: 2px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 1rem;
+      background-color: var(--panel-bg);
+      color: var(--text-main);
+    }
+
+    .filter-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .filter-chip {
+      background-color: var(--bg-color);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .filter-chip.active {
+      background-color: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+    }
+
+    .results-count {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      padding: 0 4px;
+    }
+
+    /* Store List */
+    .store-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .store-card {
+      background-color: var(--panel-bg);
+      border: 2px solid var(--border-color);
+      border-radius: 10px;
+      padding: 16px;
+      box-shadow: var(--card-shadow);
+      cursor: pointer;
+      transition: transform 0.15s, border-color 0.15s;
+    }
+
+    .store-card:hover {
+      border-color: var(--primary);
+      transform: translateY(-2px);
+    }
+
+    .store-card.selected {
+      border-color: var(--primary);
+      background-color: rgba(22, 163, 74, 0.05);
+    }
+
+    .store-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 8px;
+    }
+
+    .store-name {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .badge {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 4px 8px;
+      border-radius: 4px;
+      color: #fff;
+    }
+
+    .badge-thrift { background-color: #16a34a; }
+    .badge-flea { background-color: #d97706; }
+    .badge-goodwill { background-color: #2563eb; }
+    .badge-vintage { background-color: #9333ea; }
+
+    .store-address {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .store-links {
+      display: flex;
+      gap: 10px;
+    }
+
+    .store-link {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .store-link:hover {
+      text-decoration: underline;
+    }
+
+    /* Map Container */
+    #map {
+      flex: 1;
+      height: 100%;
+      background: #e5e3df;
+    }
+
+    /* Modal Styling */
+    .modal-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.6);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+
+    .modal-backdrop.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal {
+      background-color: var(--panel-bg);
+      border-radius: 12px;
+      width: 90%;
+      max-width: 500px;
+      padding: 24px;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-header h2 {
+      font-size: 1.3rem;
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--text-main);
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group label {
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .form-group input, .form-group select {
+      padding: 10px;
+      border: 2px solid var(--border-color);
+      border-radius: 6px;
+      font-size: 1rem;
+      background-color: var(--panel-bg);
+      color: var(--text-main);
+    }
+
+    /* Responsive Mobile View */
+    @media (max-width: 768px) {
+      .main-container {
+        flex-direction: column-reverse;
+      }
+      .sidebar {
+        width: 100%;
+        height: 50%;
+      }
+      #map {
+        height: 50%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header role="banner">
+    <div class="brand">
+      <i class="fa-solid fa-tags" aria-hidden="true"></i>
+      <div class="brand-text">
+        <h1>EzThrift.com</h1>
+        <span>THE EZ WAY TO THRIFT</span>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-secondary" id="contrastToggle" aria-label="Toggle High Contrast Mode">
+        <i class="fa-solid fa-circle-half-stroke" aria-hidden="true"></i> High Contrast
+      </button>
+      <button class="btn" id="openAddModal">
+        <i class="fa-solid fa-plus" aria-hidden="true"></i> Add Store
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Content Body -->
+  <div class="main-container">
+    
+    <!-- Sidebar Controls & Listing -->
+    <aside class="sidebar" aria-label="Thrift Store Listings">
+      <div class="search-panel">
+        <div class="search-box">
+          <input type="text" id="searchInput" placeholder="Enter ZIP code or City (e.g. 23188, 10001, Williamsburg)" aria-label="Search location by ZIP code or City" />
+          <button class="btn" id="searchBtn" aria-label="Submit Search">
+            <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+          </button>
+        </div>
+
+        <div class="filter-row" role="group" aria-label="Filter stores by category">
+          <button class="filter-chip active" data-filter="all">All Spots</button>
+          <button class="filter-chip" data-filter="thrift">Thrift Shops</button>
+          <button class="filter-chip" data-filter="goodwill">Goodwill/Charity</button>
+          <button class="filter-chip" data-filter="flea">Flea Markets</button>
+          <button class="filter-chip" data-filter="vintage">Vintage/Antique</button>
+        </div>
+
+        <div class="results-count" id="resultsCount">Showing 0 locations</div>
+      </div>
+
+      <!-- Scrollable List of Stores -->
+      <div class="store-list" id="storeList" role="region" aria-live="polite">
+        <!-- Store Cards will be rendered dynamically -->
+      </div>
+    </aside>
+
+    <!-- Interactive Leaflet Map -->
+    <main id="map" aria-label="Interactive Map of Thrift Stores"></main>
+  </div>
+
+  <!-- Add Store Modal -->
+  <div class="modal-backdrop" id="modalBackdrop" aria-hidden="true" role="dialog" aria-labelledby="modalTitle">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="modalTitle">Add a Thrift Location</h2>
+        <button class="close-btn" id="closeModal" aria-label="Close Modal">&times;</button>
+      </div>
+      <form id="addStoreForm">
+        <div class="form-group">
+          <label for="newStoreName">Store Name *</label>
+          <input type="text" id="newStoreName" required placeholder="e.g. Community Thrift Corner" />
+        </div>
+        <div class="form-group">
+          <label for="newStoreCategory">Type *</label>
+          <select id="newStoreCategory" required>
+            <option value="thrift">Thrift Shop</option>
+            <option value="goodwill">Goodwill / Charity</option>
+            <option value="flea">Flea Market</option>
+            <option value="vintage">Vintage / Antique</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="newStoreAddress">Address *</label>
+          <input type="text" id="newStoreAddress" required placeholder="123 Main St, Williamsburg, VA" />
+        </div>
+        <div class="form-group">
+          <label for="newStoreZip">ZIP Code *</label>
+          <input type="text" id="newStoreZip" required placeholder="23188" />
+        </div>
+        <div class="form-group">
+          <label for="newStoreWebsite">Website URL</label>
+          <input type="url" id="newStoreWebsite" placeholder="https://example.com" />
+        </div>
+        <button type="submit" class="btn" style="width: 100%; justify-content: center; margin-top: 10px;">
+          Submit Location
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Leaflet JS Library -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nXCdaDQ126Wc5112589B412D21A2C0B105B11D3" crossorigin=""></script>
+
+  <script>
+    // Initial Store Database
+    const initialStores = [
+      {
+        id: 1,
+        name: "Williamsburg Thrift Center",
+        category: "thrift",
+        address: "7105 Richmond Rd, Williamsburg, VA 23188",
+        zip: "23188",
+        lat: 37.3385,
+        lng: -76.7482,
+        website: "https://example.com/williamsburg-thrift"
+      },
+      {
+        id: 2,
+        name: "Goodwill Retail Store & Donation",
+        category: "goodwill",
+        address: "2404 Richmond Rd, Williamsburg, VA 23185",
+        zip: "23185",
+        lat: 37.2891,
+        lng: -76.7324,
+        website: "https://www.goodwill.org"
+      },
+      {
+        id: 3,
+        name: "Toano Flea & Vintage Market",
+        category: "flea",
+        address: "7880 Toano Village Way, Toano, VA 23168",
+        zip: "23168",
+        lat: 37.3820,
+        lng: -76.8120,
+        website: "https://example.com/toano-flea"
+      },
+      {
+        id: 4,
+        name: "Classic Antique & Thrift Outlet",
+        category: "vintage",
+        address: "5000 Olde Towne Rd, Williamsburg, VA 23188",
+        zip: "23188",
+        lat: 37.3045,
+        lng: -76.7551,
+        website: "https://example.com/classic-antiques"
+      },
+      {
+        id: 5,
+        name: "Chelsea Thrift Emporium",
+        category: "thrift",
+        address: "125 W 25th St, New York, NY 10001",
+        zip: "10001",
+        lat: 40.7445,
+        lng: -73.9931,
+        website: "https://example.com/chelsea-thrift"
+      },
+      {
+        id: 6,
+        name: "Goodwill NY Outlet",
+        category: "goodwill",
+        address: "220 E 23rd St, New York, NY 10010",
+        zip: "10010",
+        lat: 40.7388,
+        lng: -73.9822,
+        website: "https://www.goodwillny.org"
+      }
+    ];
+
+    let stores = [...initialStores];
+    let currentFilter = 'all';
+    let map, markersLayer;
+    let storeMarkers = {};
+
+    // Initialize Map
+    function initMap() {
+      // Default center: Williamsburg / Toano region
+      map = L.map('map', { zoomControl: true }).setView([37.3385, -76.7482], 11);
+
+      // OpenStreetMap Tiles
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '© OpenStreetMap contributors | EzThrift.com'
+      }).addTo(map);
+
+      markersLayer = L.layerGroup().addTo(map);
+      renderStores();
+    }
+
+    // Helper: Map badge names & colors
+    function getCategoryInfo(cat) {
+      switch(cat) {
+        case 'thrift': return { label: 'Thrift Shop', class: 'badge-thrift', color: '#16a34a' };
+        case 'flea': return { label: 'Flea Market', class: 'badge-flea', color: '#d97706' };
+        case 'goodwill': return { label: 'Goodwill/Charity', class: 'badge-goodwill', color: '#2563eb' };
+        case 'vintage': return { label: 'Vintage/Antique', class: 'badge-vintage', color: '#9333ea' };
+        default: return { label: 'Thrift Spot', class: 'badge-thrift', color: '#16a34a' };
+      }
+    }
+
+    // Render Store List & Map Markers
+    function renderStores(filteredList = null) {
+      const listContainer = document.getElementById('storeList');
+      const resultsCount = document.getElementById('resultsCount');
+      
+      listContainer.innerHTML = '';
+      markersLayer.clearLayers();
+      storeMarkers = {};
+
+      const itemsToRender = filteredList || stores.filter(s => currentFilter === 'all' || s.category === currentFilter);
+      
+      resultsCount.textContent = `Showing ${itemsToRender.length} location${itemsToRender.length === 1 ? '' : 's'}`;
+
+      if (itemsToRender.length === 0) {
+        listContainer.innerHTML = `
+          <div style="text-align: center; padding: 40px 20px; color: var(--text-muted);">
+            <i class="fa-solid fa-store-slash" style="font-size: 2.5rem; margin-bottom: 12px;"></i>
+            <p style="font-weight: 600;">No thrift spots found for this query.</p>
+            <p style="font-size: 0.9rem; margin-top: 6px;">Try searching a nearby ZIP code or click "Add Store" to add one!</p>
+          </div>
+        `;
+        return;
+      }
+
+      const bounds = L.latLngBounds();
+
+      itemsToRender.forEach(store => {
+        const catInfo = getCategoryInfo(store.category);
+
+        // 1. Create List Card
+        const card = document.createElement('div');
+        card.className = 'store-card';
+        card.dataset.id = store.id;
+        card.setAttribute('tabindex', '0');
+        card.setAttribute('role', 'article');
+        card.setAttribute('aria-label', `${store.name}, ${catInfo.label}`);
+
+        card.innerHTML = `
+          <div class="store-header">
+            <h2 class="store-name">${store.name}</h2>
+            <span class="badge ${catInfo.class}">${catInfo.label}</span>
+          </div>
+          <div class="store-address">
+            <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
+            <span>${store.address}</span>
+          </div>
+          <div class="store-links">
+            ${store.website ? `<a href="${store.website}" target="_blank" rel="noopener" class="store-link" onclick="event.stopPropagation()">
+              <i class="fa-solid fa-globe" aria-hidden="true"></i> Visit Website
+            </a>` : ''}
+            <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(store.name + ' ' + store.address)}" target="_blank" rel="noopener" class="store-link" onclick="event.stopPropagation()">
+              <i class="fa-solid fa-directions" aria-hidden="true"></i> Get Directions
+            </a>
+          </div>
+        `;
+
+        // Card Click Handler
+        card.addEventListener('click', () => selectStore(store.id, true));
+        card.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            selectStore(store.id, true);
+          }
+        });
+
+        listContainer.appendChild(card);
+
+        // 2. Create Custom Map Marker
+        const markerSvg = `
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="36" height="36">
+            <path fill="${catInfo.color}" stroke="#ffffff" stroke-width="1.5" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+          </svg>`;
+
+        const customIcon = L.divIcon({
+          html: markerSvg,
+          className: '',
+          iconSize: [36, 36],
+          iconAnchor: [18, 36],
+          popupAnchor: [0, -32]
+        });
+
+        const marker = L.marker([store.lat, store.lng], { icon: customIcon });
+
+        // Marker Popup
+        const popupContent = `
+          <div style="font-family: sans-serif; padding: 4px;">
+            <strong style="font-size: 1.05rem; color: #0f172a;">${store.name}</strong><br/>
+            <span style="font-size: 0.85rem; color: #475569;">${store.address}</span><br/>
+            ${store.website ? `<a href="${store.website}" target="_blank" style="color:#16a34a; font-weight:bold; font-size:0.85rem; display:inline-block; margin-top:6px;">Visit Website &rarr;</a>` : ''}
+          </div>
+        `;
+        marker.bindPopup(popupContent);
+
+        marker.on('click', () => selectStore(store.id, false));
+
+        markersLayer.addLayer(marker);
+        storeMarkers[store.id] = marker;
+        bounds.extend([store.lat, store.lng]);
+      });
+
+      if (itemsToRender.length > 0) {
+        map.fitBounds(bounds, { padding: [40, 40], maxZoom: 14 });
+      }
+    }
+
+    // Select & Highlight Store
+    function selectStore(storeId, zoomToMap = false) {
+      // Highlight Card
+      document.querySelectorAll('.store-card').forEach(card => {
+        card.classList.toggle('selected', card.dataset.id == storeId);
+      });
+
+      const store = stores.find(s => s.id == storeId);
+      const marker = storeMarkers[storeId];
+
+      if (store && marker) {
+        marker.openPopup();
+        if (zoomToMap) {
+          map.flyTo([store.lat, store.lng], 14, { duration: 1 });
+        }
+      }
+    }
+
+    // ZIP / City Search Logic via Nominatim Geocoding API
+    async function handleSearch() {
+      const query = document.getElementById('searchInput').value.trim();
+      if (!query) return;
+
+      try {
+        const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=us`);
+        const data = await response.json();
+
+        if (data && data.length > 0) {
+          const lat = parseFloat(data[0].lat);
+          const lng = parseFloat(data[0].lon);
+
+          // Fly map to searched coordinates
+          map.flyTo([lat, lng], 12);
+
+          // Check if we have matching local stores near or matching zip/city text
+          const matches = stores.filter(s => 
+            s.zip.includes(query) || 
+            s.address.toLowerCase().includes(query.toLowerCase())
+          );
+
+          if (matches.length > 0) {
+            renderStores(matches);
+          } else {
+            // Generate a temporary demo thrift store at searched location if none exist
+            const dynamicStore = {
+              id: Date.now(),
+              name: `Thrift Treasure (${query.toUpperCase()})`,
+              category: "thrift",
+              address: `${data[0].display_name.split(',').slice(0, 3).join(',')}`,
+              zip: query,
+              lat: lat,
+              lng: lng,
+              website: "https://example.com"
+            };
+            stores.push(dynamicStore);
+            renderStores([dynamicStore]);
+          }
+        } else {
+          alert('Location or ZIP code not found. Please try another query.');
+        }
+      } catch (error) {
+        console.error('Search Error:', error);
+        alert('Could not complete search. Please check your internet connection.');
+      }
+    }
+
+    // Event Listeners
+    document.getElementById('searchBtn').addEventListener('click', handleSearch);
+    document.getElementById('searchInput').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') handleSearch();
+    });
+
+    // Category Filter Chips
+    document.querySelectorAll('.filter-chip').forEach(chip => {
+      chip.addEventListener('click', (e) => {
+        document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+        e.target.classList.add('active');
+        currentFilter = e.target.dataset.filter;
+        renderStores();
+      });
+    });
+
+    // High Contrast Mode Toggle
+    document.getElementById('contrastToggle').addEventListener('click', () => {
+      document.body.classList.toggle('high-contrast');
+    });
+
+    // Modal Handlers
+    const backdrop = document.getElementById('modalBackdrop');
+    document.getElementById('openAddModal').addEventListener('click', () => {
+      backdrop.classList.add('active');
+      backdrop.setAttribute('aria-hidden', 'false');
+    });
+
+    document.getElementById('closeModal').addEventListener('click', () => {
+      backdrop.classList.remove('active');
+      backdrop.setAttribute('aria-hidden', 'true');
+    });
+
+    // Add New Store Form Submission
+    document.getElementById('addStoreForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const name = document.getElementById('newStoreName').value;
+      const category = document.getElementById('newStoreCategory').value;
+      const address = document.getElementById('newStoreAddress').value;
+      const zip = document.getElementById('newStoreZip').value;
+      const website = document.getElementById('newStoreWebsite').value;
+
+      // Slight random offset from map center for demonstration placement
+      const center = map.getCenter();
+
+      const newStore = {
+        id: Date.now(),
+        name,
+        category,
+        address,
+        zip,
+        lat: center.lat + (Math.random() - 0.5) * 0.02,
+        lng: center.lng + (Math.random() - 0.5) * 0.02,
+        website
+      };
+
+      stores.unshift(newStore);
+      renderStores();
+
+      // Reset & Close Modal
+      e.target.reset();
+      backdrop.classList.remove('active');
+      backdrop.setAttribute('aria-hidden', 'true');
+
+      alert(`"${name}" successfully added to EzThrift!`);
+    });
+
+    // Initialize Map on Load
+    window.addEventListener('DOMContentLoaded', initMap);
+  </script>
+</body>
+</html>
