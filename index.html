@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>EzThrift.com - The EZ way to thrift</title>
 
-  <!-- Leaflet CSS for Map -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" integrity="sha512-h9FcoyWjHcOcmEVkxOfTLnkZpj6SA824lBUebdD7p119E15B17dCdb1C1A+S+fO+I0P/0r3e8x5aN8U7g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <!-- Font Awesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
@@ -43,20 +43,13 @@
       padding: 0;
     }
 
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      font-size: 16px;
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background-color: var(--bg-color);
       color: var(--text-main);
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-      overflow: hidden;
-    }
-
-    a:focus, button:focus, input:focus, select:focus {
-      outline: var(--focus-ring);
-      outline-offset: 2px;
     }
 
     header {
@@ -68,6 +61,7 @@
       align-items: center;
       box-shadow: 0 2px 4px rgba(0,0,0,0.05);
       z-index: 1000;
+      height: 60px;
     }
 
     .brand {
@@ -82,17 +76,16 @@
     }
 
     .brand-text h1 {
-      font-size: 1.5rem;
+      font-size: 1.4rem;
       font-weight: 800;
       color: var(--primary);
       line-height: 1.1;
     }
 
     .brand-text span {
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       font-weight: 600;
       color: var(--accent);
-      letter-spacing: 0.5px;
     }
 
     .header-actions {
@@ -104,19 +97,17 @@
       background-color: var(--primary);
       color: #ffffff;
       border: none;
-      padding: 10px 16px;
+      padding: 8px 14px;
       border-radius: 8px;
       font-weight: 600;
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       cursor: pointer;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
     }
 
-    .btn:hover {
-      background-color: var(--primary-hover);
-    }
+    .btn:hover { background-color: var(--primary-hover); }
 
     .btn-secondary {
       background-color: transparent;
@@ -124,24 +115,21 @@
       border: 2px solid var(--border-color);
     }
 
-    .btn-secondary:hover {
-      background-color: var(--border-color);
-    }
-
     .main-container {
       display: flex;
-      flex: 1;
-      overflow: hidden;
+      height: calc(100vh - 60px);
+      width: 100vw;
       position: relative;
     }
 
     .sidebar {
-      width: 420px;
+      width: 400px;
       background-color: var(--panel-bg);
       border-right: 2px solid var(--border-color);
       display: flex;
       flex-direction: column;
       z-index: 500;
+      height: 100%;
     }
 
     .search-panel {
@@ -149,7 +137,7 @@
       border-bottom: 2px solid var(--border-color);
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 10px;
     }
 
     .search-box {
@@ -159,10 +147,10 @@
 
     .search-box input {
       flex: 1;
-      padding: 12px 14px;
+      padding: 10px;
       border: 2px solid var(--border-color);
-      border-radius: 8px;
-      font-size: 1rem;
+      border-radius: 6px;
+      font-size: 0.95rem;
       background-color: var(--panel-bg);
       color: var(--text-main);
     }
@@ -177,9 +165,9 @@
       background-color: var(--bg-color);
       border: 1px solid var(--border-color);
       color: var(--text-main);
-      padding: 6px 12px;
-      border-radius: 20px;
-      font-size: 0.85rem;
+      padding: 4px 10px;
+      border-radius: 16px;
+      font-size: 0.8rem;
       font-weight: 600;
       cursor: pointer;
     }
@@ -191,10 +179,9 @@
     }
 
     .results-count {
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       font-weight: 600;
       color: var(--text-muted);
-      padding: 0 4px;
     }
 
     .store-list {
@@ -203,47 +190,35 @@
       padding: 16px;
       display: flex;
       flex-direction: column;
-      gap: 14px;
+      gap: 12px;
     }
 
     .store-card {
       background-color: var(--panel-bg);
       border: 2px solid var(--border-color);
-      border-radius: 10px;
-      padding: 16px;
+      border-radius: 8px;
+      padding: 14px;
       box-shadow: var(--card-shadow);
       cursor: pointer;
-      transition: transform 0.15s, border-color 0.15s;
     }
 
-    .store-card:hover {
-      border-color: var(--primary);
-      transform: translateY(-2px);
-    }
-
-    .store-card.selected {
-      border-color: var(--primary);
-      background-color: rgba(22, 163, 74, 0.08);
-    }
+    .store-card:hover { border-color: var(--primary); }
+    .store-card.selected { border-color: var(--primary); background-color: rgba(22, 163, 74, 0.08); }
 
     .store-header {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
 
-    .store-name {
-      font-size: 1.1rem;
-      font-weight: 700;
-      color: var(--text-main);
-    }
+    .store-name { font-size: 1.05rem; font-weight: 700; }
 
     .badge {
-      font-size: 0.75rem;
+      font-size: 0.7rem;
       font-weight: 700;
       text-transform: uppercase;
-      padding: 4px 8px;
+      padding: 3px 6px;
       border-radius: 4px;
       color: #fff;
     }
@@ -254,129 +229,40 @@
     .badge-vintage { background-color: #9333ea; }
 
     .store-address {
-      font-size: 0.95rem;
+      font-size: 0.85rem;
       color: var(--text-muted);
-      margin-bottom: 12px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
+      margin-bottom: 8px;
     }
 
-    .store-links {
-      display: flex;
-      gap: 12px;
-    }
+    .store-links { display: flex; gap: 12px; }
 
     .store-link {
       color: var(--primary);
       text-decoration: none;
       font-weight: 700;
-      font-size: 0.9rem;
-      display: flex;
-      align-items: center;
-      gap: 4px;
+      font-size: 0.85rem;
     }
 
-    .store-link:hover {
-      text-decoration: underline;
-    }
-
-    /* Map container styling */
     #map {
       flex: 1;
       height: 100%;
-      min-height: 400px;
+      min-height: 100%;
       background: #e2e8f0;
-      position: relative;
-    }
-
-    .modal-backdrop {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.6);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 2000;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.2s;
-    }
-
-    .modal-backdrop.active {
-      opacity: 1;
-      pointer-events: auto;
-    }
-
-    .modal {
-      background-color: var(--panel-bg);
-      border-radius: 12px;
-      width: 90%;
-      max-width: 500px;
-      padding: 24px;
-      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .close-btn {
-      background: none;
-      border: none;
-      font-size: 1.5rem;
-      cursor: pointer;
-      color: var(--text-main);
-    }
-
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .form-group label {
-      font-size: 0.9rem;
-      font-weight: 600;
-    }
-
-    .form-group input, .form-group select {
-      padding: 10px;
-      border: 2px solid var(--border-color);
-      border-radius: 6px;
-      font-size: 1rem;
-      background-color: var(--panel-bg);
-      color: var(--text-main);
+      z-index: 1;
     }
 
     @media (max-width: 768px) {
-      .main-container {
-        flex-direction: column-reverse;
-      }
-      .sidebar {
-        width: 100%;
-        height: 50%;
-      }
-      #map {
-        height: 50%;
-      }
+      .main-container { flex-direction: column-reverse; }
+      .sidebar { width: 100%; height: 50%; }
+      #map { height: 50%; }
     }
   </style>
 </head>
 <body>
 
-  <!-- Header -->
-  <header role="banner">
+  <header>
     <div class="brand">
-      <i class="fa-solid fa-tags" aria-hidden="true"></i>
+      <i class="fa-solid fa-tags"></i>
       <div class="brand-text">
         <h1>EzThrift.com</h1>
         <span>THE EZ WAY TO THRIFT</span>
@@ -384,22 +270,18 @@
     </div>
     <div class="header-actions">
       <button class="btn btn-secondary" id="contrastToggle">
-        <i class="fa-solid fa-circle-half-stroke" aria-hidden="true"></i> High Contrast
-      </button>
-      <button class="btn" id="openAddModal">
-        <i class="fa-solid fa-plus" aria-hidden="true"></i> Add Store
+        <i class="fa-solid fa-circle-half-stroke"></i> High Contrast
       </button>
     </div>
   </header>
 
-  <!-- Main Workspace -->
   <div class="main-container">
     <aside class="sidebar">
       <div class="search-panel">
         <div class="search-box">
-          <input type="text" id="searchInput" placeholder="Enter ZIP code or City (e.g. 23188, 10001)" />
+          <input type="text" id="searchInput" placeholder="ZIP code or City (e.g. 23188, 10001)" />
           <button class="btn" id="searchBtn">
-            <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+            <i class="fa-solid fa-magnifying-glass"></i>
           </button>
         </div>
 
@@ -420,85 +302,44 @@
     <main id="map"></main>
   </div>
 
-  <!-- Add Store Modal -->
-  <div class="modal-backdrop" id="modalBackdrop">
-    <div class="modal">
-      <div class="modal-header">
-        <h2>Add a Thrift Location</h2>
-        <button class="close-btn" id="closeModal">&times;</button>
-      </div>
-      <form id="addStoreForm">
-        <div class="form-group">
-          <label for="newStoreName">Store Name *</label>
-          <input type="text" id="newStoreName" required placeholder="e.g. Community Thrift Corner" />
-        </div>
-        <div class="form-group">
-          <label for="newStoreCategory">Type *</label>
-          <select id="newStoreCategory" required>
-            <option value="thrift">Thrift Shop</option>
-            <option value="goodwill">Goodwill / Charity</option>
-            <option value="flea">Flea Market</option>
-            <option value="vintage">Vintage / Antique</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label for="newStoreAddress">Address *</label>
-          <input type="text" id="newStoreAddress" required placeholder="123 Main St, Williamsburg, VA" />
-        </div>
-        <div class="form-group">
-          <label for="newStoreZip">ZIP Code *</label>
-          <input type="text" id="newStoreZip" required placeholder="23188" />
-        </div>
-        <div class="form-group">
-          <label for="newStoreWebsite">Website URL</label>
-          <input type="url" id="newStoreWebsite" placeholder="https://example.com" />
-        </div>
-        <button type="submit" class="btn" style="width: 100%; justify-content: center; margin-top: 10px;">
-          Submit Location
-        </button>
-      </form>
-    </div>
-  </div>
-
-  <!-- Leaflet Map JavaScript -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" integrity="sha512-BwHfrr4c9kmRkLw6iXFdzgOHpAwOqqm45R55SiW4iNE89CWD23TQMGDm5fA3C/46L5C0D761A6aM24m670Y=" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <!-- Leaflet JavaScript -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <script>
-    const initialStores = [
+    const stores = [
       { id: 1, name: "Williamsburg Thrift Center", category: "thrift", address: "7105 Richmond Rd, Williamsburg, VA 23188", zip: "23188", lat: 37.3385, lng: -76.7482, website: "https://example.com" },
-      { id: 2, name: "Goodwill Retail Store & Donation", category: "goodwill", address: "2404 Richmond Rd, Williamsburg, VA 23185", zip: "23185", lat: 37.2891, lng: -76.7324, website: "https://www.goodwill.org" },
+      { id: 2, name: "Goodwill Retail Store", category: "goodwill", address: "2404 Richmond Rd, Williamsburg, VA 23185", zip: "23185", lat: 37.2891, lng: -76.7324, website: "https://www.goodwill.org" },
       { id: 3, name: "Toano Flea & Vintage Market", category: "flea", address: "7880 Toano Village Way, Toano, VA 23168", zip: "23168", lat: 37.3820, lng: -76.8120, website: "https://example.com" },
       { id: 4, name: "Classic Antique & Thrift Outlet", category: "vintage", address: "5000 Olde Towne Rd, Williamsburg, VA 23188", zip: "23188", lat: 37.3045, lng: -76.7551, website: "https://example.com" },
       { id: 5, name: "Chelsea Thrift Emporium", category: "thrift", address: "125 W 25th St, New York, NY 10001", zip: "10001", lat: 40.7445, lng: -73.9931, website: "https://example.com" }
     ];
 
-    let stores = [...initialStores];
     let currentFilter = 'all';
-    let map, markersLayer;
+    let map, markersGroup;
     let storeMarkers = {};
 
-    function initMap() {
-      if (typeof L === 'undefined') {
-        document.getElementById('map').innerHTML = '<div style="padding: 20px; color: red;">Map library failed to load. Please check your internet connection and refresh.</div>';
-        return;
-      }
-
+    function initApp() {
+      // 1. Initialize Map
       map = L.map('map').setView([37.3385, -76.7482], 11);
 
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      // 2. Open-access CartoDB Tile Layer (Works directly in local offline HTML files)
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
         maxZoom: 19,
-        attribution: '© OpenStreetMap'
+        subdomains: 'abcd',
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>'
       }).addTo(map);
 
-      markersLayer = L.layerGroup().addTo(map);
+      markersGroup = L.layerGroup().addTo(map);
 
-      // Force map size update after rendering
-      setTimeout(() => { map.invalidateSize(); }, 300);
-
+      // 3. Render List and Markers
       renderStores();
+
+      // 4. Force map recalculation after initial render
+      setTimeout(() => { map.invalidateSize(); }, 300);
+      setTimeout(() => { map.invalidateSize(); }, 1000);
     }
 
-    function getCategoryInfo(cat) {
+    function getCatInfo(cat) {
       switch(cat) {
         case 'thrift': return { label: 'Thrift Shop', class: 'badge-thrift', color: '#16a34a' };
         case 'flea': return { label: 'Flea Market', class: 'badge-flea', color: '#d97706' };
@@ -513,64 +354,63 @@
       const resultsCount = document.getElementById('resultsCount');
       
       listContainer.innerHTML = '';
-      if (markersLayer) markersLayer.clearLayers();
+      markersGroup.clearLayers();
       storeMarkers = {};
 
       const itemsToRender = filteredList || stores.filter(s => currentFilter === 'all' || s.category === currentFilter);
       resultsCount.textContent = `Showing ${itemsToRender.length} location${itemsToRender.length === 1 ? '' : 's'}`;
 
       if (itemsToRender.length === 0) {
-        listContainer.innerHTML = '<div style="text-align: center; padding: 20px; color: var(--text-muted);">No locations found for this query.</div>';
+        listContainer.innerHTML = '<div style="text-align: center; padding: 20px; color: var(--text-muted);">No locations found for this search.</div>';
         return;
       }
 
       const bounds = L.latLngBounds();
 
       itemsToRender.forEach(store => {
-        const catInfo = getCategoryInfo(store.category);
+        const catInfo = getCatInfo(store.category);
 
+        // Sidebar Card
         const card = document.createElement('div');
         card.className = 'store-card';
         card.dataset.id = store.id;
 
         card.innerHTML = `
           <div class="store-header">
-            <h2 class="store-name">${store.name}</h2>
+            <span class="store-name">${store.name}</span>
             <span class="badge ${catInfo.class}">${catInfo.label}</span>
           </div>
           <div class="store-address">
-            <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
-            <span>${store.address}</span>
+            <i class="fa-solid fa-location-dot"></i> ${store.address}
           </div>
           <div class="store-links">
-            ${store.website ? `<a href="${store.website}" target="_blank" class="store-link" onclick="event.stopPropagation()"><i class="fa-solid fa-globe"></i> Website</a>` : ''}
-            <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(store.name + ' ' + store.address)}" target="_blank" class="store-link" onclick="event.stopPropagation()"><i class="fa-solid fa-directions"></i> Directions</a>
+            <a href="${store.website}" target="_blank" class="store-link" onclick="event.stopPropagation()">Website &rarr;</a>
+            <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(store.name + ' ' + store.address)}" target="_blank" class="store-link" onclick="event.stopPropagation()">Directions &rarr;</a>
           </div>
         `;
 
         card.addEventListener('click', () => selectStore(store.id, true));
         listContainer.appendChild(card);
 
-        if (map && markersLayer) {
-          const marker = L.circleMarker([store.lat, store.lng], {
-            radius: 10,
-            fillColor: catInfo.color,
-            color: '#ffffff',
-            weight: 2,
-            opacity: 1,
-            fillOpacity: 0.9
-          });
+        // Map Marker
+        const marker = L.circleMarker([store.lat, store.lng], {
+          radius: 9,
+          fillColor: catInfo.color,
+          color: '#ffffff',
+          weight: 2,
+          opacity: 1,
+          fillOpacity: 0.9
+        });
 
-          marker.bindPopup(`<strong>${store.name}</strong><br/>${store.address}`);
-          marker.on('click', () => selectStore(store.id, false));
+        marker.bindPopup(`<strong>${store.name}</strong><br/>${store.address}`);
+        marker.on('click', () => selectStore(store.id, false));
 
-          markersLayer.addLayer(marker);
-          storeMarkers[store.id] = marker;
-          bounds.extend([store.lat, store.lng]);
-        }
+        markersGroup.addLayer(marker);
+        storeMarkers[store.id] = marker;
+        bounds.extend([store.lat, store.lng]);
       });
 
-      if (map && itemsToRender.length > 0) {
+      if (itemsToRender.length > 0) {
         map.fitBounds(bounds, { padding: [40, 40], maxZoom: 14 });
       }
     }
@@ -591,50 +431,27 @@
       }
     }
 
-    async function handleSearch() {
-      const query = document.getElementById('searchInput').value.trim();
-      if (!query) return;
+    function handleSearch() {
+      const query = document.getElementById('searchInput').value.trim().toLowerCase();
+      if (!query) {
+        renderStores();
+        return;
+      }
 
       const matches = stores.filter(s => 
-        s.zip.includes(query) || 
-        s.address.toLowerCase().includes(query.toLowerCase())
+        s.zip.toLowerCase().includes(query) || 
+        s.address.toLowerCase().includes(query) ||
+        s.name.toLowerCase().includes(query)
       );
 
-      if (matches.length > 0) {
-        renderStores(matches);
-      } else {
-        try {
-          const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=us`);
-          const data = await res.json();
-          if (data && data.length > 0) {
-            const lat = parseFloat(data[0].lat);
-            const lng = parseFloat(data[0].lon);
-            
-            const newSpot = {
-              id: Date.now(),
-              name: `Thrift Spot (${query})`,
-              category: "thrift",
-              address: data[0].display_name.split(',').slice(0, 3).join(','),
-              zip: query,
-              lat: lat,
-              lng: lng,
-              website: "https://example.com"
-            };
-            stores.push(newSpot);
-            renderStores([newSpot]);
-            map.flyTo([lat, lng], 13);
-          } else {
-            alert('Location not found.');
-          }
-        } catch(e) {
-          alert('Could not search location.');
-        }
-      }
+      renderStores(matches);
     }
 
-    // Handlers
+    // Event Listeners
     document.getElementById('searchBtn').addEventListener('click', handleSearch);
-    document.getElementById('searchInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') handleSearch(); });
+    document.getElementById('searchInput').addEventListener('keyup', (e) => {
+      if (e.key === 'Enter') handleSearch();
+    });
 
     document.querySelectorAll('.filter-chip').forEach(chip => {
       chip.addEventListener('click', (e) => {
@@ -649,30 +466,8 @@
       document.body.classList.toggle('high-contrast');
     });
 
-    const backdrop = document.getElementById('modalBackdrop');
-    document.getElementById('openAddModal').addEventListener('click', () => backdrop.classList.add('active'));
-    document.getElementById('closeModal').addEventListener('click', () => backdrop.classList.remove('active'));
-
-    document.getElementById('addStoreForm').addEventListener('submit', (e) => {
-      e.preventDefault();
-      const center = map ? map.getCenter() : { lat: 37.3385, lng: -76.7482 };
-      const newStore = {
-        id: Date.now(),
-        name: document.getElementById('newStoreName').value,
-        category: document.getElementById('newStoreCategory').value,
-        address: document.getElementById('newStoreAddress').value,
-        zip: document.getElementById('newStoreZip').value,
-        lat: center.lat + (Math.random() - 0.5) * 0.02,
-        lng: center.lng + (Math.random() - 0.5) * 0.02,
-        website: document.getElementById('newStoreWebsite').value
-      };
-      stores.unshift(newStore);
-      renderStores();
-      e.target.reset();
-      backdrop.classList.remove('active');
-    });
-
-    window.addEventListener('load', initMap);
+    // Run when window fully loads
+    window.onload = initApp;
   </script>
 </body>
 </html>
